@@ -378,6 +378,29 @@ static int lj_cf_package_loader_lua(lua_State *L)
   return 1;  /* library loaded successfully */
 }
 
+//hack by pulleyzzz
+#ifdef FAKE_ANDROID_LIB_LOADER
+static const char *findfile_2(lua_State *L, const char *name,
+			    const char *pname)
+{
+  const char *path;
+  lua_getfield(L, LUA_ENVIRONINDEX, pname);
+  path = lua_tostring(L, -1);
+  if (path == NULL)
+    luaL_error(L, LUA_QL("package.%s") " must be a string", pname);
+  return searchpath(L, name, path, ".", "_");
+}
+
+static int lj_cf_package_loader_c(lua_State *L)
+{
+  const char *name = luaL_checkstring(L, 1);
+  const char *filename = findfile_2(L, name, "cpath");
+  if (filename == NULL) return 1;  /* library not found in this path */
+  if (ll_loadfunc(L, filename, name, 0) != 0)
+    loaderror(L, filename);
+  return 1;  /* library loaded successfully */
+}
+#else
 static int lj_cf_package_loader_c(lua_State *L)
 {
   const char *name = luaL_checkstring(L, 1);
@@ -387,7 +410,7 @@ static int lj_cf_package_loader_c(lua_State *L)
     loaderror(L, filename);
   return 1;  /* library loaded successfully */
 }
-
+#endif
 static int lj_cf_package_loader_croot(lua_State *L)
 {
   const char *filename;

@@ -2539,9 +2539,17 @@ static void build_subroutines(BuildCtx *ctx)
   |.macro vm_round_hf, func
   |  lui TMP0, 0x4330			// Hiword of 2^52 (double).
   |  mtc1 r0, f4
+  |.if VER >= 20
+  |  mthc1 TMP0, f4
+  |.else
   |  mtc1 TMP0, f5
+  |.endif
   |  abs.d FRET2, FARG1			// |x|
+  |.if VER >= 20
+  |    mfhc1 AT, f12
+  |.else
   |    mfc1 AT, f13
+  |.endif
   |  c.olt.d 0, FRET2, f4
   |   add.d FRET1, FRET2, f4		// (|x| + 2^52) - 2^52
   |  bc1f 0, >1				// Truncate only if |x| < 2^52.
@@ -2553,7 +2561,11 @@ static void build_subroutines(BuildCtx *ctx)
   |   lui TMP0, 0x3ff0			// Hiword of +1 (double).
   |.endif
   |.if "func" == "trunc"
+  |.if VER >= 20
+  |   mthc1 TMP0, f4
+  |.else
   |   mtc1 TMP0, f5
+  |.endif
   |  c.olt.d 0, FRET2, FRET1		// |x| < result?
   |   sub.d FRET2, FRET1, f4
   |  movt.d FRET1, FRET2, 0		// If yes, subtract +1.
@@ -2562,7 +2574,11 @@ static void build_subroutines(BuildCtx *ctx)
   |.  movn.d FRET1, FRET2, AT		// Merge sign bit back in.
   |.else
   |  neg.d FRET2, FRET1
+  |.if VER >= 20
+  |   mthc1 TMP0, f4
+  |.else
   |   mtc1 TMP0, f5
+  |.endif
   |  movn.d FRET1, FRET2, AT		// Merge sign bit back in.
   |.if "func" == "ceil"
   |  c.olt.d 0, FRET1, FARG1		// x > result?

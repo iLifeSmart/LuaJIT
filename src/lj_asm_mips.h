@@ -290,8 +290,13 @@ static void asm_gencall(ASMState *as, const CCallInfo *ci, IRRef *args)
 	    as->freeset |= (of & RSET_RANGE(REGARG_FIRSTGPR, REGARG_LASTGPR+1));
 	    if (irt_isnum(ir->t)) {
 #if LJ_32
+#if _MIPS_ARCH_MIPS32R2
+	      emit_tg(as, MIPSI_MFHC1, gpr+(LJ_BE?0:1), r);
+	      emit_tg(as, MIPSI_MFC1, gpr+(LJ_BE?1:0), r);
+#else
 	      emit_tg(as, MIPSI_MFC1, gpr+(LJ_BE?0:1), r+1);
 	      emit_tg(as, MIPSI_MFC1, gpr+(LJ_BE?1:0), r);
+#endif
 	      lj_assertA(rset_test(as->freeset, gpr+1),
 			 "reg %d not free", gpr+1);  /* Already evicted. */
 	      gpr += 2;
@@ -372,8 +377,13 @@ static void asm_setupresult(ASMState *as, IRIns *ir, const CCallInfo *ci)
 	  ra_free(as, dest);
 	  ra_modified(as, dest);
 #if LJ_32
+#if _MIPS_ARCH_MIPS32R2
+	  emit_tg(as, MIPSI_MTC1, RID_RETLO, dest);
+	  emit_tg(as, MIPSI_MTHC1, RID_RETHI, dest);
+#else
 	  emit_tg(as, MIPSI_MTC1, RID_RETHI, dest+1);
 	  emit_tg(as, MIPSI_MTC1, RID_RETLO, dest);
+#endif
 #else
 	  emit_tg(as, MIPSI_DMTC1, RID_RET, dest);
 #endif
@@ -1075,8 +1085,13 @@ static void asm_href(ASMState *as, IRIns *ir, IROp merge)
 	emit_ds(as, MIPSI_MOVE, tmp1, type);
 	emit_ds(as, MIPSI_MOVE, tmp2, key);
 #else
+#if _MIPS_ARCH_MIPS32R2
+	emit_tg(as, MIPSI_MFC1, tmp2, key);
+	emit_tg(as, MIPSI_MFHC1, tmp1, key);
+#else
 	emit_tg(as, MIPSI_MFC1, tmp2, key);
 	emit_tg(as, MIPSI_MFC1, tmp1, key+1);
+#endif
 #endif
       } else {
 	emit_dst(as, MIPSI_XOR, tmp2, key, tmp1);

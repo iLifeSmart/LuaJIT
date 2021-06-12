@@ -72,27 +72,16 @@ int lj_str_haspattern(GCstr *s)
 
 /* -- String hashing ------------------------------------------------------ */
 
-/* Keyed sparse ARX string hash. Constant time. */
+
+//hack by pulleyzzz
 static StrHash hash_sparse(uint64_t seed, const char *str, MSize len)
 {
-  /* Constants taken from lookup3 hash by Bob Jenkins. */
-  StrHash a, b, h = len ^ (StrHash)seed;
-  if (len >= 4) {  /* Caveat: unaligned access! */
-    a = lj_getu32(str);
-    h ^= lj_getu32(str+len-4);
-    b = lj_getu32(str+(len>>1)-2);
-    h ^= b; h -= lj_rol(b, 14);
-    b += lj_getu32(str+(len>>2)-1);
-  } else {
-    a = *(const uint8_t *)str;
-    h ^= *(const uint8_t *)(str+len-1);
-    b = *(const uint8_t *)(str+(len>>1));
-    h ^= b; h -= lj_rol(b, 14);
-  }
-  a ^= h; a -= lj_rol(h, 11);
-  b ^= a; b -= lj_rol(a, 25);
-  h ^= b; h -= lj_rol(b, 16);
-  return h;
+	MSize a, b, h=len;
+	 a = (len>>5)+1;  /* if string is too long, don't hash all its chars */
+
+	 for (b=len; b>=a; b-=a)  /* compute hash */
+	   h = h ^ ((h<<5)+(h>>2)+((unsigned char)str[b-1]));
+	 return h;
 }
 
 #if LUAJIT_SECURITY_STRHASH

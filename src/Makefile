@@ -87,7 +87,8 @@ BUILDMODE= mixed
 ##############################################################################
 # Enable/disable these features as needed, but make sure you force a full
 # recompile with "make clean", followed by "make".
-XCFLAGS=
+# hack by pulleyzzz ,-DLUAJIT_SECURITY_MCODE=0 crash on mips
+XCFLAGS=-DLUAJIT_SECURITY_PRNG=0 -DLUAJIT_SECURITY_STRHASH=0 -DLUAJIT_SECURITY_STRID=0
 #
 # Permanently disable the FFI extension to reduce the size of the LuaJIT
 # executable. But please consider that the FFI library is compiled-in,
