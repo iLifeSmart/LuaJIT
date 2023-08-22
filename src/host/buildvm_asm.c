@@ -244,7 +244,8 @@ void emit_asm(BuildCtx *ctx)
   fprintf(ctx->fp, "\t.file \"buildvm_%s.dasc\"\n", ctx->dasm_arch);
   fprintf(ctx->fp, "\t.text\n");
 #if LJ_TARGET_MIPS32 && !LJ_ABI_SOFTFP
-  fprintf(ctx->fp, "\t.module fp=32\n");
+  //hack by pulleyzzz, patch fpxx and not use .module (x1k not support)
+  //fprintf(ctx->fp, "\t.module fp=32\n");
 #endif
 #if LJ_TARGET_MIPS
   fprintf(ctx->fp, "\t.set nomips16\n\t.abicalls\n\t.set noreorder\n\t.set nomacro\n");
