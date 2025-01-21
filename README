@@ -14,3 +14,19 @@ Please point your favorite browser to:
 
  doc/luajit.html
 
+
+##### LifeSmart Luajit mips CPU X1000/E 问题 #####
+
+自此次提交开始
+	Compile table traversals: next(), pairs(), BC_ISNEXT/BC_ITERN. bb0f2410 Mike Pall <mike> 2021年9月19日 下午11:49
+到目前最新提交
+	Add -F option to override filename in jit.bcsave (luajit -b).  03080b79 Mike Pall <mike> 2022年8月15日 下午8:16
+
+Luajit 使能JIT下，导致进程卡死，排查问题位置可能在于：
+	1. src/lj_record.c
+		函数 static LoopEvent rec_itern(jit_State *J, BCReg ra, BCReg rb) 中 小端代码部分;
+		目前处理将 #if LJ_BE 修改为 #if 1
+
+	2. src/lj_ffrecord.c
+		函数 static void LJ_FASTCALL recff_next(jit_State *J, RecordFFData *rd) 中 小端代码部分;
+		目前处理将 #if LJ_BE 修改为 #if 1
