@@ -1,6 +1,6 @@
 /*
 ** Instruction dispatch handling.
-** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2025 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_dispatch_c
@@ -453,7 +453,7 @@ static int call_init(lua_State *L, GCfunc *fn)
     int numparams = pt->numparams;
     int gotparams = (int)(L->top - L->base);
     int need = pt->framesize;
-    if ((pt->flags & PROTO_VARARG)) need += 1+gotparams;
+    if ((pt->flags & PROTO_VARARG)) need += 1+LJ_FR2+gotparams;
     lj_state_checkstack(L, (MSize)need);
     numparams -= gotparams;
     return numparams >= 0 ? numparams : 0;
